@@ -1,0 +1,84 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  userId        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  telephone String? @unique
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Borrowings Borrowings[]
+}
+
+model Equipment {
+  equipmentId          String   @id @default(cuid())
+  name        String
+  description String?
+  image       String?
+  quantity_total    Int
+  quantity_available Int
+  status      Equipment_Status @default(AVAILABLE)
+  categoryId  String
+  category    Equipment_Categories @relation(fields: [categoryId], references: [categoryId])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  Borrowings Borrowings[]
+}
+
+model Equipment_Categories {
+  categoryId          String   @id @default(cuid())
+  name        String
+  description String?
+  equipments  Equipment[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Borrowings {
+  borrowingId String @id @default(cuid())
+  userId      String
+  user        User @relation(fields: [userId], references: [userId])
+  equipmentId String
+  equipment   Equipment @relation(fields: [equipmentId], references: [equipmentId])
+  quantity    Int
+  status      Borrowing_Status @default(PENDING)
+  borrowDate  DateTime
+  returnDate  DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+enum Equipment_Status {
+  AVAILABLE
+  UNAVAILABLE
+}
+enum Borrowing_Status {
+  PENDING //รอการอนุมัติยืม (หากมีการยืมที่ต้องผ่านการอนุมัติ)
+  APPROVED //การยืมได้รับการอนุมัติแล้ว แต่ยังไม่มารับอุปกรณ์
+  BORROWED //อุปกรณ์ถูกยืมไปแล้วและยังไม่คืน
+  RETURNED //ได้ทำการคืนอุปกรณ์เรียบร้อยแล้ว
+  OVERDUE //การยืมเกินกำหนดวันคืน
+  CANCELLED //การยืมถูกยกเลิก
+  LOST //อุปกรณ์หายระหว่างการยืม
+  DAMAGED //อุปกรณ์ถูกคืนในสภาพเสียหาย
+}
