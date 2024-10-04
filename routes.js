@@ -1,4 +1,5 @@
 import express from 'express';
+import upload from './libs/multer.js';
 
 const router = express.Router();
 
@@ -20,7 +21,7 @@ router.delete('/equipment-categories/:id', deleteEquipmentCategory);
 
 router.get('/equipment', getEquipments);
 router.get('/equipment/:id', getEquipmentById);
-router.post('/equipment', createEquipment);
+router.post('/equipment', upload, createEquipment);
 router.put('/equipment/:id', updateEquipment);
 router.delete('/equipment/:id', deleteEquipment);
 

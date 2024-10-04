@@ -1,9 +1,10 @@
 import prisma from "../libs/prisma.js";
 import vine from "@vinejs/vine";
 import { equipmentValidator } from "../libs/vine.js";
+import fs from "fs";
 
 export const createEquipment = async (req, res) => {
-    const { name, description, image, quantity_total, quantity_available, categoryId } = req.body;
+    const { name, description, quantity_total, quantity_available, categoryId } = req.body;
     try {
         await equipmentValidator.validate(req.body);
     } catch (error) {
@@ -14,9 +15,9 @@ export const createEquipment = async (req, res) => {
             data: {
                 name,
                 description,
-                image,
-                quantity_total,
-                quantity_available,
+                image: req.file.filename,
+                quantity_total: parseInt(quantity_total),
+                quantity_available: parseInt(quantity_available),
                 categoryId,
             },
         });
@@ -58,11 +59,16 @@ export const getEquipmentById = async (req, res) => {
         return res.json({ error: "Invalid equipment id" }).status(400);
     }
     try {
-        const equipment = await prisma.equipment.findUnique({
+        let equipment = await prisma.equipment.findUnique({
             where: {
                 equipmentId: id,
             },
         });
+        console.log(equipment);
+        //convert image to base64
+        // const fileImage = fs.readFileSync(`uploads/${equipment.image}`);
+        // const base64Image = new Buffer.from(fileImage).toString("base64");
+        // equipment.image = base64Image;
         res.json(equipment);
     } catch (error) {
         res.json({ error: error.message }).status(500);
@@ -88,9 +94,9 @@ export const updateEquipment = async (req, res) => {
             data: {
                 name,
                 description,
-                image,
-                quantity_total,
-                quantity_available,
+                image: req.file.filename,
+                quantity_total: parseInt(quantity_total),
+                quantity_available: parseInt(quantity_available),
                 categoryId,
             },
         });
