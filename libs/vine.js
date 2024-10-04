@@ -23,3 +23,11 @@ export const equipmentSchema = vine.object({
     categoryId: vine.string(),
 });
 export const equipmentValidator = vine.compile(equipmentSchema);
+
+export const borrowingSchema = vine.object({
+    userId: vine.string(),
+    equipmentId: vine.string(),
+    quantity: vine.number(),
+});
+
+export const borrowingValidator = vine.compile(borrowingSchema);
