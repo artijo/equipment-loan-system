@@ -8,7 +8,7 @@ export const createUser = async (req, res) => {
         await userValidator.validate(req.body);
     } catch (error) {
         console.log(error, errors.E_VALIDATION_ERROR);
-        return res.json({ error: error.message }).status(400)
+        return res.status(400).json({ error: error.message })
     }
     try {
         const user = await prisma.user.create({
@@ -18,19 +18,19 @@ export const createUser = async (req, res) => {
                 telephone
             },
         });
-        res.json(user.userId).status(201);
+        res.status(201).json(user.userId);
     } catch (error) {
-        res.json({ error: error.message }).status(500);
+        res.status(500).json({ error: error.message });
     }
 };
 
 export const getUsers = async (req, res) => {
     const { sort, limit } = req.query;
     if (sort && sort !== "asc" && sort !== "desc") {
-        return res.json({ error: "Invalid sort value" }).status(400);
+        return res.status(400).json({ error: "Invalid sort value" });
     }
     if (limit && isNaN(limit)) {
-        return res.json({ error: "Invalid limit value" }).status(400);
+        return res.status(400).json({ error: "Invalid limit value" });
     }
     try {
         if (sort && limit) {
@@ -40,13 +40,13 @@ export const getUsers = async (req, res) => {
                 },
                 take: parseInt(limit),
             });
-            res.json(users);
+            res.status(200).json(users);
         } else {
             const users = await prisma.user.findMany();
-            res.json(users);
+            res.status(200).json(users);
         }
     } catch (error) {
-        res.json({ error: error.message }).status(500);
+        res.status(500).json({ error: error.message });
     }
 };
 
@@ -54,7 +54,7 @@ export const getUserByEmail = async (req, res) => {
     const { email } = req.params;
     const isEmail = vine.helpers.isEmail(email);
     if (!isEmail) {
-        return res.json({ error: "Invalid email" }).status(400);
+        return res.status(400).json({ error: "Invalid email" });
     }
     try {
         const user = await prisma.user.findUnique({
@@ -62,9 +62,9 @@ export const getUserByEmail = async (req, res) => {
                 email,
             },
         });
-        res.json(user);
+        res.status(200).json(user);
     } catch (error) {
-        res.json({ error: error.message }).status(500);
+        res.status(500).json({ error: error.message });
     }
 }
 
@@ -72,12 +72,12 @@ export const updateUser = async (req, res) => {
     const { id } = req.params;
     const { name, email, telephone } = req.body;
     if(!vine.helpers.isString(id)) {
-        return res.json({ error: "Invalid id" }).status(400);
+        return res.status(400).json({ error: "Invalid id" });
     }
     try {
         await userValidator.validate(req.body);
     } catch (error) {
-        return res.json({ error: error.message }).status(400);
+        return res.status(400).json({ error: error.message });
     }
     try {
         const user = await prisma.user.update({
@@ -90,16 +90,16 @@ export const updateUser = async (req, res) => {
                 telephone,
             },
         });
-        res.json(user).status(200);
+        res.status(200).json(user);
     } catch (error) {
-        res.json({ error: error.message }).status(500);
+        res.status(500).json({ error: error.message });
     }
 };
 
 export const deleteUser = async (req, res) => {
     const { id } = req.params;
     if(!vine.helpers.isString(id)) {
-        return res.json({ error: "Invalid id" }).status(400);
+        return res.status(400).json({ error: "Invalid id" });
     }
     try {
         await prisma.user.delete({
@@ -107,8 +107,8 @@ export const deleteUser = async (req, res) => {
                 userId: parseInt(id),
             },
         });
-        res.json({ message: "User deleted" }).status(200);
+        res.status(200).json({ message: "User deleted" });
     } catch (error) {
-        res.json({ error: error.message }).status(500);
+        res.status(500).json({ error: error.message });
     }
 };

@@ -8,7 +8,7 @@ export const createEquipment = async (req, res) => {
     try {
         await equipmentValidator.validate(req.body);
     } catch (error) {
-        return res.json({ error: error.message }).status(400);
+        return res.status(400).json({ error: error.message });
     }
     try {
         await prisma.equipment.create({
@@ -21,7 +21,7 @@ export const createEquipment = async (req, res) => {
                 categoryId,
             },
         });
-        res.json({ message: "Equipment created" }).status(201);
+        res.status(201).json({ message: "Equipment created" });
     } catch (error) {
         res.json({ error: error.message }).status(500);
     }
@@ -30,10 +30,10 @@ export const createEquipment = async (req, res) => {
 export const getEquipments = async (req, res) => {
     const { sort, limit } = req.query;
     if (sort && sort !== "asc" && sort !== "desc") {
-        return res.json({ error: "Invalid sort value" }).status(400);
+        return res.status(400).json({ error: "Invalid sort value" });
     }
     if (limit && isNaN(limit)) {
-        return res.json({ error: "Invalid limit value" }).status(400);
+        return res.status(400).json({ error: "Invalid limit value" });
     }
     try {
         if (sort && limit) {
@@ -43,20 +43,20 @@ export const getEquipments = async (req, res) => {
                 },
                 take: parseInt(limit),
             });
-            res.json(equipments);
+            res.status(200).json(equipments);
         } else {
             const equipments = await prisma.equipment.findMany();
-            res.json(equipments);
+            res.status(200).json(equipments);
         }
     } catch (error) {
-        res.json({ error: error.message }).status(500);
+        res.status(500).json({ error: error.message });
     }
 }
 
 export const getEquipmentById = async (req, res) => {
     const { id } = req.params;
     if (!vine.helpers.isString(id)) {
-        return res.json({ error: "Invalid equipment id" }).status(400);
+        return res.status(400).json({ error: "Invalid equipment id" });
     }
     try {
         let equipment = await prisma.equipment.findUnique({
@@ -64,14 +64,13 @@ export const getEquipmentById = async (req, res) => {
                 equipmentId: id,
             },
         });
-        console.log(equipment);
         //convert image to base64
         // const fileImage = fs.readFileSync(`uploads/${equipment.image}`);
         // const base64Image = new Buffer.from(fileImage).toString("base64");
         // equipment.image = base64Image;
-        res.json(equipment);
+        res.status(200).json(equipment);
     } catch (error) {
-        res.json({ error: error.message }).status(500);
+        res.status(500).json({ error: error.message });
     }
 }
 
@@ -79,12 +78,12 @@ export const updateEquipment = async (req, res) => {
     const { id } = req.params;
     const { name, description, image, quantity_total, quantity_available, categoryId } = req.body;
     if (!vine.helpers.isString(id)) {
-        return res.json({ error: "Invalid equipment id" }).status(400);
+        return res.status(400).json({ error: "Invalid equipment id" });
     }
     try {
         await equipmentValidator.validate(req.body);
     } catch (error) {
-        return res.json({ error: error.message }).status(400);
+        return res.status(400).json({ error: error.message });
     }
     try {
         await prisma.equipment.update({
@@ -100,16 +99,16 @@ export const updateEquipment = async (req, res) => {
                 categoryId,
             },
         });
-        res.json({ message: "Equipment updated" }).status(200);
+        res.status(200).json({ message: "Equipment updated" });
     } catch (error) {
-        res.json({ error: error.message }).status(500);
+        res.status(500).json({ error: error.message });
     }
 }
 
 export const deleteEquipment = async (req, res) => {
     const { id } = req.params;
     if (!vine.helpers.isString(id)) {
-        return res.json({ error: "Invalid equipment id" }).status(400);
+        return res.status(400).json({ error: "Invalid equipment id" });
     }
     try {
         await prisma.equipment.delete({
@@ -117,8 +116,8 @@ export const deleteEquipment = async (req, res) => {
                 equipmentId: id,
             },
         });
-        res.json({ message: "Equipment deleted" }).status(200);
+        res.status(200).json({ message: "Equipment deleted" });
     } catch (error) {
-        res.json({ error: error.message }).status(500);
+        res.status(500).json({ error: error.message });
     }
 }

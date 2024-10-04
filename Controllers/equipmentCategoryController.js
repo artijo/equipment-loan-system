@@ -7,7 +7,7 @@ export const createEquipmentCategory = async (req, res) => {
     try {
         await equipmentCategoryValidator.validate(req.body);
     } catch (error) {
-        return res.json({ error: error.message }).status(400);
+        return res.status(400).json({ error: error.message });
     }
     try {
         await prisma.equipment_Categories.create({
@@ -16,19 +16,19 @@ export const createEquipmentCategory = async (req, res) => {
                 description,
             },
         });
-        res.json({ message: "Equipment Category created" }).status(201);
+        res.status(201).json({ message: "Equipment Category created" });
     } catch (error) {
-        res.json({ error: error.message }).status(500);
+        res.status(500).json({ error: error.message });
     }
 }
 
 export const getEquipmentCategories = async (req, res) => {
     const { sort, limit } = req.query;
     if (sort && sort !== "asc" && sort !== "desc") {
-        return res.json({ error: "Invalid sort value" }).status(400);
+        return res.status(400).json({ error: "Invalid sort value" });
     }
     if (limit && isNaN(limit)) {
-        return res.json({ error: "Invalid limit value" }).status(400);
+        return res.status(400).json({ error: "Invalid limit value" });
     }
     try {
         if (sort && limit) {
@@ -44,14 +44,14 @@ export const getEquipmentCategories = async (req, res) => {
             res.json(equipmentCategories);
         }
     } catch (error) {
-        res.json({ error: error.message }).status(500);
+        res.status(500).json({ error: error.message });
     }
 }
 
 export const getEquipmentCategoryById = async (req, res) => {
     const { id } = req.params;
     if (!vine.helpers.isString(id)) {
-        return res.json({ error: "Invalid equipment category id" }).status(400);
+        return res.status(400).json({ error: "Invalid equipment category id" });
     }
     try {
         const equipmentCategory = await prisma.equipment_Categories.findUnique({
@@ -59,9 +59,9 @@ export const getEquipmentCategoryById = async (req, res) => {
                 categoryId: id,
             },
         });
-        res.json(equipmentCategory);
+        res.status(200).json(equipmentCategory);
     } catch (error) {
-        res.json({ error: error.message }).status(500);
+        res.status(500).json({ error: error.message });
     }
 }
 
@@ -69,12 +69,12 @@ export const updateEquipmentCategory = async (req, res) => {
     const { id } = req.params;
     const { name, description } = req.body;
     if (!vine.helpers.isString(id)) {
-        return res.json({ error: "Invalid equipment category id" }).status(400);
+        return res.status(400).json({ error: "Invalid equipment category id" });
     }
     try {
         await equipmentCategoryValidator.validate(req.body);
     } catch (error) {
-        return res.json({ error: error.message }).status(400);
+        return res.status(400).json({ error: error.message });
     }
     try {
         await prisma.equipment_Categories.update({
@@ -88,14 +88,14 @@ export const updateEquipmentCategory = async (req, res) => {
         });
         res.json({ message: "Equipment Category updated" });
     } catch (error) {
-        res.json({ error: error.message }).status(500);
+        res.status(500).json({ error: error.message });
     }
 }
 
 export const deleteEquipmentCategory = async (req, res) => {
     const { id } = req.params;
     if (!vine.helpers.isString(id)) {
-        return res.json({ error: "Invalid equipment category id" }).status(400);
+        return res.status(400).json({ error: "Invalid equipment category id" });
     }
     try {
         await prisma.equipment_Categories.delete({
@@ -105,6 +105,6 @@ export const deleteEquipmentCategory = async (req, res) => {
         });
         res.json({ message: "Equipment Category deleted" });
     } catch (error) {
-        res.json({ error: error.message }).status(500);
+        res.status(500).json({ error: error.message });
     }
 }
