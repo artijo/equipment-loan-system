@@ -3,7 +3,7 @@ import prisma from "../libs/prisma.js";
 
 export const isAuth = (req, res, next) => {
     const token = req.cookies.token;
-   jwt.verify(token, process.env.JWT_SECRET, (err, tk) => {
+   jwt.verify(token, process.env.JSONWEBTOKEN_SECRET, (err, tk) => {
         if (err) {
             return res.status(401).json({ error: "Unauthorized" });
         }
