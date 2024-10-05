@@ -7,12 +7,15 @@ import router from './Routes.js';
 
 const app = express();
 app.use(morgan('dev'));
-app.use(cors());
+app.use(cors(
+    {
+        origin: ['http://localhost:5173', 'http://localhost:3000'],
+        credentials: true,
+    }
+));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser(
-    
-));
+app.use(cookieParser());
 
 app.use('/uploads', express.static('uploads'));
 

@@ -2,11 +2,14 @@ import express from 'express';
 import upload from './libs/multer.js';
 
 const router = express.Router();
+import { googleLogin } from './Controllers/authController.js';
 
 import { getUsers, createUser, getUserByEmail, updateUser, deleteUser } from './Controllers/userController.js';
 import { getEquipmentCategories, createEquipmentCategory, getEquipmentCategoryById, updateEquipmentCategory, deleteEquipmentCategory } from './Controllers/equipmentCategoryController.js';
 import { getEquipments, getEquipmentById, createEquipment, updateEquipment, deleteEquipment } from './Controllers/equipmentsController.js';
 import { getBorrowings, getBorrowingById, getBorrowingsByEquipmentId, getBorrowingsByUserId, createBorrowing, updateBorrowing, deleteBorrowing } from './Controllers/borrowingController.js';
+
+import { isAuth, isAdmin } from './middlewares.js';
 
 router.get('/users', getUsers);
 router.post('/users', createUser);
@@ -33,5 +36,10 @@ router.get('/borrowings/equipment/:equipmentId', getBorrowingsByEquipmentId);
 router.post('/borrowings', createBorrowing);
 router.put('/borrowings/:id', updateBorrowing);
 router.delete('/borrowings/:id', deleteBorrowing);
+
+router.post('/login', googleLogin);
+router.get('/checkrole', isAuth, isAdmin, (req, res) => {
+    res.json({ message: 'Authorized' });
+});
 
 export default router;

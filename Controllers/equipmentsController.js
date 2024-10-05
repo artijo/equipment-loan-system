@@ -1,9 +1,9 @@
 import prisma from "../libs/prisma.js";
 import vine from "@vinejs/vine";
 import { equipmentValidator } from "../libs/vine.js";
-import fs from "fs";
 
 export const createEquipment = async (req, res) => {
+    console.log(req.body);
     const { name, description, quantity_total, quantity_available, categoryId } = req.body;
     try {
         await equipmentValidator.validate(req.body);
@@ -42,10 +42,19 @@ export const getEquipments = async (req, res) => {
                     equipmentId: sort,
                 },
                 take: parseInt(limit),
+                include: {
+                    category: true,
+                },
             });
             res.status(200).json(equipments);
         } else {
-            const equipments = await prisma.equipment.findMany();
+            const equipments = await prisma.equipment.findMany(
+                {
+                    include: {
+                        category: true,
+                    },
+                }
+            );
             res.status(200).json(equipments);
         }
     } catch (error) {

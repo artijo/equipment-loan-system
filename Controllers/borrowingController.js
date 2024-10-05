@@ -15,6 +15,8 @@ export const createBorrowing = async (req, res) => {
                 userId,
                 equipmentId,
                 quantity: parseInt(quantity),
+                borrowDate: new Date(),
+                returnDate,
             },
         });
         res.status(201).json({ message: "Borrowing created" });
@@ -120,6 +122,8 @@ export const updateBorrowing = async (req, res) => {
                 userId,
                 equipmentId,
                 quantity: parseInt(quantity),
+                borrowDate,
+                returnDate,
             },
         });
         res.status(200).json({ message: "Borrowing updated" });
