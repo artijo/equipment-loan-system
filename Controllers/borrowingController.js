@@ -19,6 +19,20 @@ export const createBorrowing = async (req, res) => {
                 returnDate,
             },
         });
+        // Update equipment quantity
+        const equipment = await prisma.equipment.findUnique({
+            where: {
+                equipmentId,
+            },
+        });
+        await prisma.equipment.update({
+            where: {
+                equipmentId,
+            },
+            data: {
+                quantity_available: equipment.quantity_available - parseInt(quantity),
+            },
+        });
         res.status(201).json({ message: "Borrowing created" });
     } catch (error) {
         res.status(500).json({ error: error.message });
