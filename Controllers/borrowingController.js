@@ -116,6 +116,47 @@ export const getBorrowingsByEquipmentId = async (req, res) => {
     }
 }
 
+export const returnBorrowing = async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+    if (!vine.helpers.isString(id)) {
+        return res.status(400).json({ error: "Invalid borrowing id" });
+    }
+    try {
+        const borrowing = await prisma.borrowings.findUnique({
+            where: {
+                borrowingId: id,
+            },
+        });
+        await prisma.borrowings.update({
+            where: {
+                borrowingId: id,
+            },
+            data: {
+                returnDate: new Date(),
+                status: status, 
+            },
+        });
+        // Update equipment quantity
+        const equipment = await prisma.equipment.findUnique({
+            where: {
+                equipmentId: borrowing.equipmentId,
+            },
+        });
+        await prisma.equipment.update({
+            where: {
+                equipmentId: borrowing.equipmentId,
+            },
+            data: {
+                quantity_available: equipment.quantity_available + borrowing.quantity,
+            },
+        });
+        res.status(200).json({ message: "Borrowing returned" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
 export const updateBorrowing = async (req, res) => {
     const { id } = req.params;
     const { userId, equipmentId, quantity } = req.body;
