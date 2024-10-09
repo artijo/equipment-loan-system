@@ -26,7 +26,7 @@ router.delete('/equipment-categories/:id', deleteEquipmentCategory);
 router.get('/equipment', getEquipments);
 router.get('/equipment/:id', getEquipmentById);
 router.post('/equipment', upload, createEquipment);
-router.put('/equipment/:id', updateEquipment);
+router.put('/equipment/:id', upload,updateEquipment);
 router.delete('/equipment/:id', deleteEquipment);
 
 router.get('/borrowings', getBorrowings);

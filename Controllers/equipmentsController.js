@@ -72,6 +72,9 @@ export const getEquipmentById = async (req, res) => {
             where: {
                 equipmentId: id,
             },
+            include: {
+                category: true,
+            },
         });
         //convert image to base64
         // const fileImage = fs.readFileSync(`uploads/${equipment.image}`);
@@ -85,16 +88,17 @@ export const getEquipmentById = async (req, res) => {
 
 export const updateEquipment = async (req, res) => {
     const { id } = req.params;
+    console.log(req.body);
     const { name, description, image, quantity_total, quantity_available, categoryId } = req.body;
     if (!vine.helpers.isString(id)) {
         return res.status(400).json({ error: "Invalid equipment id" });
     }
     try {
-        await equipmentValidator.validate(req.body);
-    } catch (error) {
-        return res.status(400).json({ error: error.message });
-    }
-    try {
+        const oldEquipment = await prisma.equipment.findUnique({
+            where: {
+                equipmentId: id,
+            },
+        });
         await prisma.equipment.update({
             where: {
                 equipmentId: id,
@@ -104,7 +108,7 @@ export const updateEquipment = async (req, res) => {
                 description,
                 image: req.file.filename,
                 quantity_total: parseInt(quantity_total),
-                quantity_available: parseInt(quantity_available),
+                quantity_available: parseInt(oldEquipment.quantity_available),
                 categoryId,
             },
         });
