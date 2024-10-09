@@ -3,28 +3,37 @@ import vine from "@vinejs/vine";
 import { borrowingValidator } from "../libs/vine.js";
 
 export const createBorrowing = async (req, res) => {
-    const { userId, equipmentId, quantity } = req.body;
+    const { userId, equipmentId, quantity, returnDate } = req.body;
     try {
         await borrowingValidator.validate(req.body);
     } catch (error) {
         return res.status(400).json({ error: error.message });
     }
     try {
+        const equipment = await prisma.equipment.findUnique({
+            where: {
+                equipmentId,
+            },
+        });
+        // Check if equipment is available
+        if (equipment.quantity_available < parseInt(quantity)) {
+            return res.status(400).json({ error: "Equipment not available" });
+        }
+        //chec status of equipment
+        if (equipment.status !== "AVAILABLE") {
+            return res.status(400).json({ error: "Equipment not available" });
+        }
+        // Create borrowing
         await prisma.borrowings.create({
             data: {
                 userId,
                 equipmentId,
                 quantity: parseInt(quantity),
                 borrowDate: new Date(),
-                returnDate,
+                returnDate: new Date(returnDate),
             },
         });
         // Update equipment quantity
-        const equipment = await prisma.equipment.findUnique({
-            where: {
-                equipmentId,
-            },
-        });
         await prisma.equipment.update({
             where: {
                 equipmentId,
@@ -34,6 +43,26 @@ export const createBorrowing = async (req, res) => {
             },
         });
         res.status(201).json({ message: "Borrowing created" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
+export const approveBorrowing = async (req, res) => {
+    const { id } = req.params;
+    if (!vine.helpers.isString(id)) {
+        return res.status(400).json({ error: "Invalid borrowing id" });
+    }
+    try {
+        await prisma.borrowings.update({
+            where: {
+                borrowingId: id,
+            },
+            data: {
+                status: "APPROVED",
+            },
+        });
+        res.status(200).json({ message: "Borrowing approved" });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -118,25 +147,39 @@ export const getBorrowingsByEquipmentId = async (req, res) => {
 
 export const returnBorrowing = async (req, res) => {
     const { id } = req.params;
-    const { status } = req.body;
+    let { status } = req.body;
     if (!vine.helpers.isString(id)) {
         return res.status(400).json({ error: "Invalid borrowing id" });
     }
     try {
+        //check return date
         const borrowing = await prisma.borrowings.findUnique({
             where: {
                 borrowingId: id,
             },
         });
-        await prisma.borrowings.update({
-            where: {
-                borrowingId: id,
-            },
-            data: {
-                returnDate: new Date(),
-                status: status, 
-            },
-        });
+        if (borrowing.returnDate < new Date()) {
+            status = "OVERDUE";
+        }
+        if(status){
+            await prisma.borrowings.update({
+                where: {
+                    borrowingId: id,
+                },
+                data: {
+                    status,
+                },
+            });
+        }else{
+            await prisma.borrowings.update({
+                where: {
+                    borrowingId: id,
+                },
+                data: {
+                    status: "RETURNED",
+                },
+            });
+        }
         // Update equipment quantity
         const equipment = await prisma.equipment.findUnique({
             where: {
@@ -152,6 +195,58 @@ export const returnBorrowing = async (req, res) => {
             },
         });
         res.status(200).json({ message: "Borrowing returned" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
+export const cancelBorrowing = async (req, res) => {
+    const { id } = req.params;
+    if (!vine.helpers.isString(id)) {
+        return res.status(400).json({ error: "Invalid borrowing id" });
+    }
+    try {
+        //check if borrowing is approved
+        const borrowingStatus = await prisma.borrowings.findUnique({
+            where: {
+                borrowingId: id,
+            },
+            select: {
+                status: true,
+            },
+        });
+        if (borrowingStatus.status !== "PENDING") {
+            return res.status(400).json({ error: "Cannot cancel approved borrowing" });
+        }
+
+        await prisma.borrowings.update({
+            where: {
+                borrowingId: id,
+            },
+            data: {
+                status: "CANCELLED",
+            },
+        });
+        //update quantity
+        const borrowing = await prisma.borrowings.findUnique({
+            where: {
+                borrowingId: id,
+            },
+        });
+        const equipment = await prisma.equipment.findUnique({
+            where: {
+                equipmentId: borrowing.equipmentId,
+            },
+        });
+        await prisma.equipment.update({
+            where: {
+                equipmentId: borrowing.equipmentId,
+            },
+            data: {
+                quantity_available: equipment.quantity_available + borrowing.quantity,
+            },
+        });
+        res.status(200).json({ message: "Borrowing cancelled" });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

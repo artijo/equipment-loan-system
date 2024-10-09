@@ -7,7 +7,7 @@ import { googleLogin } from './Controllers/authController.js';
 import { getUsers, createUser, getUserByEmail, updateUser, deleteUser } from './Controllers/userController.js';
 import { getEquipmentCategories, createEquipmentCategory, getEquipmentCategoryById, updateEquipmentCategory, deleteEquipmentCategory } from './Controllers/equipmentCategoryController.js';
 import { getEquipments, getEquipmentById, createEquipment, updateEquipment, deleteEquipment } from './Controllers/equipmentsController.js';
-import { getBorrowings, getBorrowingById, getBorrowingsByEquipmentId, getBorrowingsByUserId, createBorrowing, updateBorrowing, deleteBorrowing } from './Controllers/borrowingController.js';
+import { getBorrowings, getBorrowingById, getBorrowingsByEquipmentId, getBorrowingsByUserId, createBorrowing, updateBorrowing, deleteBorrowing, approveBorrowing, returnBorrowing, cancelBorrowing } from './Controllers/borrowingController.js';
 
 import { isAuth, isAdmin } from './middlewares.js';
 
@@ -35,6 +35,9 @@ router.get('/borrowings/user/:userId', getBorrowingsByUserId);
 router.get('/borrowings/equipment/:equipmentId', getBorrowingsByEquipmentId);
 router.post('/borrowings', createBorrowing);
 router.put('/borrowings/:id', updateBorrowing);
+router.put('/borrowings/approve/:id', approveBorrowing);
+router.put('/borrowings/return/:id', returnBorrowing);
+router.put('/borrowings/cancel/:id', cancelBorrowing);
 router.delete('/borrowings/:id', deleteBorrowing);
 
 router.post('/login', googleLogin);
